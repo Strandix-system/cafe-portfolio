@@ -34,17 +34,25 @@ export default function LoginPopup({ open, onClose }) {
   };
 
   const { mutate, isPending } = usePost(API_ROUTES.createCustomer, {
-    onSuccess: () => {
-      console.log("Phone:", data.phoneNo, "Name:", data.name);
-      localStorage.setItem("cafe_user_logged_in", data.phoneNo);
-      toast.success("Success");
-      onClose();
-    },
-  });
+  onSuccess: (response) => {
+    console.log("API response:", response);
+
+    localStorage.setItem(
+      "cafe_user_logged_in",
+      response.phoneNumber 
+    );
+
+    toast.success("Success");
+    onClose();
+  },
+  onError: (error) => {
+    console.error(error);
+    toast.error("Login failed");
+  },
+});
 
   const onSubmit = (data) => {
     mutate(data);
-    console.log(data);
   };
   return (
     <Dialog open={open}>
@@ -59,7 +67,7 @@ export default function LoginPopup({ open, onClose }) {
         </IconButton>
       </DialogTitle>
 
-      <form onClick={handleSubmit(onSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <DialogContent className="m-2">
           <p className="text-sm text-gray-500 mb-3 text-center">
             Enter your details to continue
@@ -93,15 +101,15 @@ export default function LoginPopup({ open, onClose }) {
             <Grid size={12}>
               <FormLabel>Phone Number:</FormLabel>
               <Controller
-                name="phoneNo"
+                name="phoneNumber"
                 control={control}
                 render={({ field }) => (
                   <TextField
                     {...field}
                     fullWidth
                     size="small"
-                    error={!!errors.phoneNo}
-                    helperText={errors.phoneNo?.message}
+                    error={!!errors.phoneNumber}
+                    helperText={errors.phoneNumber?.message}
                     InputProps={{
                       startAdornment: (
                         <InputAdornment position="start">

@@ -1,6 +1,6 @@
 const API_ROUTES = {
 
-    createCustomer: "api/customer/create"
+    createCustomer: "customer/create"
 
 }
 export default API_ROUTES;

@@ -7,7 +7,7 @@ import { Toaster } from "react-hot-toast";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
-
+import { AuthProvider } from "@/context/AuthContext";
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -30,14 +30,15 @@ export default function App() {
     <CacheProvider value={emotionCache}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider delayDuration={0}>
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-
-            <Toaster position="top-right" reverseOrder={false} />
-          </BrowserRouter>
+          <AuthProvider>
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index />} />
+                <Route path="*" element={<NotFound />} />
+              </Routes>
+              <Toaster position="top-right" reverseOrder={false} />
+            </BrowserRouter>
+          </AuthProvider>
         </TooltipProvider>
       </QueryClientProvider>
     </CacheProvider>
