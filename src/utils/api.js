@@ -1,0 +1,3 @@
+export const api_enums = {
+  JWT_ACCESS_TOKEN: "JWT_ACCESS_TOKEN",
+};

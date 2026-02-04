@@ -12,7 +12,6 @@ export function AboutSection() {
         <div className={`grid md:grid-cols-2 gap-12 md:gap-20 items-center ${
           isElegant ? '' : 'md:grid-cols-[1fr,1.2fr]'
         }`}>
-          {/* Image */}
           <motion.div
             initial={{ opacity: 0, x: -30 }}
             whileInView={{ opacity: 1, x: 0 }}
@@ -47,7 +46,6 @@ export function AboutSection() {
             </div>
           </motion.div>
 
-          {/* Content */}
           <motion.div
             initial={{ opacity: 0, x: 30 }}
             whileInView={{ opacity: 1, x: 0 }}
