@@ -8,6 +8,9 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { AuthProvider } from "@/context/AuthContext";
+import { LayoutProvider } from "./context/LayoutContext";
+import MyOrders from "./pages/MyOrders";
+
 export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -33,7 +36,23 @@ export default function App() {
           <AuthProvider>
             <BrowserRouter>
               <Routes>
-                <Route path="/" element={<Index />} />
+                <Route path="/:layoutId/:qrId?" element={<LayoutProvider> <Index /> </LayoutProvider>} />
+                <Route
+                  path="/cafe/:layoutId/*"
+                  element={
+                    <LayoutProvider>
+                      <Index />
+                    </LayoutProvider>
+                  }
+                />
+                <Route
+                  path="/:layoutId/:qrId?/my-orders"
+                  element={
+                    <LayoutProvider>
+                      <MyOrders />
+                    </LayoutProvider>
+                  }
+                />
                 <Route path="*" element={<NotFound />} />
               </Routes>
               <Toaster position="top-right" reverseOrder={false} />

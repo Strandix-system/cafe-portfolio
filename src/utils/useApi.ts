@@ -15,15 +15,34 @@ const useFetch = (key, endpoint, params = {}, options = {}) => {
     queryFn: () => APIRequest.get(endpoint, params),
     ...defaultQueryOptions,
     ...options,
+
+    refetchOnWindowFocus: true,
+    refetchOnReconnect: true,
+    staleTime: 0,          // data becomes stale immediately
+    refetchInterval: false
   });
 };
 
-const usePost = (endpoint, options = {}, params) => {
-  return useMutation({
-    mutationFn: (data) => APIRequest.post(endpoint, data, params),
+// const usePost = (endpoint, options = {}, params) => {
+//   return useMutation({
+//     mutationFn: (data) => APIRequest.post(endpoint, data, params),
+//     ...options,
+//   });
+// };
+const usePost = <TResponse = any, TPayload = any>(
+  endpoint: string,
+  options: any = {},
+  params: any = {}
+) => {
+  return useMutation<TResponse, Error, TPayload>({
+    mutationFn: (payload: TPayload) => {
+      // console.log("🚀 POST API HIT 👉", endpoint, payload);
+      return APIRequest.post(endpoint, payload, params);
+    },
     ...options,
   });
 };
+
 
 const usePut = (endpoint, options = {}) => {
   return useMutation({

@@ -9,7 +9,6 @@ export const AuthProvider = ({ children }) => {
 
   useEffect(() => {
     const storedUser = localStorage.getItem("cafe_user");
-
     if (storedUser) {
       setUser(JSON.parse(storedUser));
       setIsAuthenticated(true);
@@ -27,7 +26,6 @@ export const AuthProvider = ({ children }) => {
     setUser(null);
     setIsAuthenticated(false);
     localStorage.removeItem("cafe_user");
-    localStorage.removeItem("cafe_user_skipped_login");
   };
 
   return (
@@ -38,6 +36,7 @@ export const AuthProvider = ({ children }) => {
         login,
         logout,
         loading,
+        setUser
       }}
     >
       {children}

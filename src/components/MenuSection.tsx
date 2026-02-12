@@ -1,18 +1,31 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { MenuCard } from './MenuCard';
-import { menuItems, categoryLabels } from '@/data/mockData';
 import { useLayout } from '@/context/LayoutContext';
-import { MenuCategory } from '@/types/cafe';
-
-const categories: MenuCategory[] = ['coffee', 'tea', 'pastries', 'breakfast', 'lunch', 'desserts'];
+import { LAYOUTS } from '@/utils/constants';
 
 export function MenuSection() {
-  const [activeCategory, setActiveCategory] = useState<MenuCategory>('coffee');
-  const { layoutType } = useLayout();
-  const isElegant = layoutType === 'elegant';
+  const [activeCategory, setActiveCategory] = useState<string | null>(null);
+  const { layoutType , config, menuItems, categories,} = useLayout();
+  const isElegant = layoutType === LAYOUTS.ELEGANT;
 
-  const filteredItems = menuItems.filter((item) => item.category === activeCategory);
+    useEffect(() => {
+    if (!activeCategory && categories.length) {
+      setActiveCategory(categories[0]);
+    }
+  }, [categories, activeCategory]);
+
+    if (!menuItems.length) {
+    return (
+      <section id="menu" className="py-20 text-center text-muted-foreground">
+        Menu not available ☕
+      </section>
+    );
+  }
+
+    const filteredItems = activeCategory
+    ? menuItems.filter((item) => item.category === activeCategory)
+    : [];
 
   return (
     <section id="menu" className="py-20 md:py-32 bg-secondary/30">
@@ -30,10 +43,10 @@ export function MenuSection() {
                 Our Selection
               </span>
               <h2 className="font-display text-4xl md:text-5xl lg:text-6xl font-medium text-foreground mb-4">
-                The Menu
+               {config?.menuTitle || "The Menu"}
               </h2>
               <p className="text-muted-foreground max-w-md mx-auto">
-                Crafted with passion, served with love
+                 "Discover our curated selection of coffee, tea, and treats"
               </p>
             </>
           ) : (
@@ -43,7 +56,7 @@ export function MenuSection() {
                 <span className="text-sm font-medium">Freshly Made</span>
               </div>
               <h2 className="font-display text-4xl md:text-5xl font-bold text-foreground mb-4">
-                What We Serve
+                {config?.menuTitle || "The Menu"}
               </h2>
               <p className="text-muted-foreground max-w-md mx-auto">
                 From espresso to desserts, everything made with care
@@ -73,7 +86,7 @@ export function MenuSection() {
                     : 'bg-card text-muted-foreground hover:bg-muted rounded-full'
               } ${isElegant ? 'rounded-none' : 'rounded-full'}`}
             >
-              {categoryLabels[category]}
+              {category.charAt(0).toUpperCase() + category.slice(1)}
             </button>
           ))}
         </motion.div>
