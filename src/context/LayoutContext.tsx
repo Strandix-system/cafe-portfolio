@@ -81,10 +81,30 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     }
   }, [tableData]);
 
+  useEffect(() => {
+    if (!data?.result) return;
+
+    const cafeName = data.result.adminId?.cafeName || "Cafe";
+    const logo = data.result.adminId.logo || "/favicon.ico";
+    const description =
+      data.result.cafeDescription || `Welcome to ${cafeName}`;
+
+    document.title = cafeName;
+    updateFavicon(logo);
+    updateMeta("description", description);
+    updateMetaProperty("og:title", cafeName);
+    updateMetaProperty("og:description", description);
+    updateMetaProperty("og:image", logo);
+    updateMetaProperty("twitter:title", cafeName);
+    updateMetaProperty("twitter:description", description);
+    updateMetaProperty("twitter:image", logo);
+  }, [data]);
+
+
   const menuItems: MenuItem[] =
     data?.result?.menus?.map((item: any) => ({
       ...item,
-      id: item._id, // ✅ CRITICAL FIX
+      id: item._id, 
     })) || [];
 
   const categories: string[] = Array.from(
@@ -121,4 +141,35 @@ export function useLayout() {
   const context = useContext(LayoutContext);
   if (!context) throw new Error("useLayout must be used within LayoutProvider");
   return context;
+}
+function updateFavicon(href: string) {
+  document
+    .querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')
+    .forEach(el => el.remove());
+
+  const link = document.createElement("link");
+  link.rel = "icon";
+  link.type = "image/png";
+  link.href = `${href}?v=${Date.now()}`; // cache bust
+  document.head.appendChild(link);
+}
+
+function updateMeta(name: string, content: string) {
+  let tag = document.querySelector(`meta[name="${name}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute("name", name);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
+}
+
+function updateMetaProperty(property: string, content: string) {
+  let tag = document.querySelector(`meta[property="${property}"]`);
+  if (!tag) {
+    tag = document.createElement("meta");
+    tag.setAttribute("property", property);
+    document.head.appendChild(tag);
+  }
+  tag.setAttribute("content", content);
 }
