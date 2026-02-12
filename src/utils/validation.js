@@ -5,10 +5,15 @@ export const loginSchema = yup.object({
   phoneNumber: yup
     .string()
     .matches(/^[6-9]\d{9}$/, "Enter valid 10-digit mobile number"),
+    tableNumber: yup
+    .string()
+    .required("Table number is required"),
 });
 
 export const contactSchema = yup.object({
-  name: yup.string().required("Name is required"),
+  firstName: yup
+    .string()
+    .required("Name is required"),
   email: yup
     .string()
     .email("Enter a valid email")

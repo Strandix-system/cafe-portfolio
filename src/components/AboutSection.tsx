@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { useLayout } from '@/context/LayoutContext';
-import coffeeArt from '@/assets/coffee-art.jpg';
+import { LAYOUTS } from '@/utils/constants';
 
 export function AboutSection() {
   const { layoutType, config } = useLayout();
-  const isElegant = layoutType === 'elegant';
+  const isElegant = layoutType === LAYOUTS.ELEGANT;
 
   return (
     <section id="about" className="py-20 md:py-32 bg-background">
@@ -21,7 +21,7 @@ export function AboutSection() {
           >
             <div className={`relative ${isElegant ? '' : 'p-4'}`}>
               <img
-                src={coffeeArt}
+                src={config?.aboutImage}
                 alt="Our coffee"
                 className={`w-full aspect-square object-cover ${
                   isElegant ? 'rounded-none' : 'rounded-3xl'
@@ -56,21 +56,15 @@ export function AboutSection() {
             {isElegant ? (
               <>
                 <span className="text-accent text-sm uppercase tracking-[0.3em] mb-3 block">
-                  Our Story
+                 {config?.aboutTitle || 'About Us'}
                 </span>
                 <h2 className="font-display text-4xl md:text-5xl font-medium text-foreground mb-6">
                   Passion in Every Cup
                 </h2>
                 <div className="space-y-4 text-muted-foreground leading-relaxed">
                   <p>
-                    Founded with a simple mission: to create a space where great coffee meets
-                    meaningful connections. Every bean is carefully sourced, every cup crafted
-                    with intention.
-                  </p>
-                  <p>
-                    Our baristas are artisans, trained in the delicate art of espresso making.
-                    From the first pour to the final sip, we ensure an experience that
-                    transcends the ordinary.
+                    {config?.aboutDescription ||
+                      "At our cafe, we're more than just a place to grab a coffee. We're a community hub where every cup tells a story. Our passion for quality meets our love for creating warm, welcoming spaces where friendships bloom and ideas percolate."}
                   </p>
                 </div>
                 <div className="mt-8 grid grid-cols-3 gap-8">
@@ -98,15 +92,14 @@ export function AboutSection() {
               <>
                 <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4">
                   <span>✨</span>
-                  <span className="text-sm font-medium">About Us</span>
+                  <span className="text-sm font-medium">{config?.aboutTitle || 'About Us'}</span>
                 </div>
                 <h2 className="font-display text-3xl md:text-4xl font-bold text-foreground mb-4">
                   More Than Just Coffee
                 </h2>
                 <p className="text-muted-foreground leading-relaxed mb-6">
-                  We're a community hub where every cup tells a story. Our passion for
-                  quality meets our love for creating warm, welcoming spaces where
-                  friendships bloom and ideas percolate.
+               {config?.aboutDescription ||
+                  "Our cafe is a blend of passion, community, and exceptional coffee. We believe in creating more than just great drinks – we create a space where people can connect, relax, and enjoy life's simple pleasures."}
                 </p>
                 <div className="flex flex-wrap gap-4">
                   <div className="flex items-center gap-2 bg-card px-4 py-3 rounded-xl">

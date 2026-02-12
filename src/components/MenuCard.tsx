@@ -1,24 +1,15 @@
 import { motion } from "framer-motion";
-import { Plus, Star, Sparkles } from "lucide-react";
+import { Minus, Plus, Star, Sparkles } from "lucide-react";
 import { MenuItem } from "@/types/cafe";
 import { useCart } from "@/context/CartContext";
 import { useLayout } from "@/context/LayoutContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import coffeeArt from "@/assets/coffee-art.jpg";
+import fallbackImage from "@/assets/coffee-art.jpg";
 import pastry from "@/assets/pastry.jpg";
 import breakfast from "@/assets/breakfast.jpg";
 import toast from "react-hot-toast";
-
-const placeholderImages: Record<string, string> = {
-  coffee: coffeeArt,
-  tea: coffeeArt,
-  pastries: pastry,
-  breakfast: breakfast,
-  lunch: breakfast,
-  desserts: pastry,
-  beverages: coffeeArt,
-};
+import { LAYOUTS } from "@/utils/constants";
 
 interface MenuCardProps {
   item: MenuItem;
@@ -26,11 +17,13 @@ interface MenuCardProps {
 }
 
 export function MenuCard({ item, index }: MenuCardProps) {
-  const { addItem } = useCart();
+  const { addItem, items, updateQuantity } = useCart();
   const { layoutType } = useLayout();
-  const isElegant = layoutType === "elegant";
+  const isElegant = layoutType === LAYOUTS.ELEGANT;
 
-  const image = placeholderImages[item.category] || coffeeArt;
+  const image = item.image || fallbackImage;
+  const cartItem = items.find((i) => i.id === item.id);
+
 
   if (isElegant) {
     return (
@@ -64,21 +57,6 @@ export function MenuCard({ item, index }: MenuCardProps) {
               </Badge>
             )}
           </div>
-
-          {/* Add Button */}
-          {/* <motion.div
-            initial={{ opacity: 0, scale: 0.8 }}
-            whileHover={{ opacity: 1, scale: 1 }}
-            className="absolute bottom-3 right-3"
-          >
-            <Button
-              size="icon"
-              className="bg-primary text-primary-foreground rounded-full shadow-medium opacity-0 group-hover:opacity-100 transition-opacity"
-              onClick={() => addItem(item)}
-            >
-              <Plus className="h-14 w-4" />
-            </Button>
-          </motion.div> */}
         </div>
 
         {/* Content */}
@@ -87,26 +65,62 @@ export function MenuCard({ item, index }: MenuCardProps) {
             <h3 className="font-display text-lg font-medium text-foreground">
               {item.name}
             </h3>
-            <span className="text-primary font-semibold">
-              ${item.price.toFixed(2)}
-            </span>
+
+            <div className="text-right">
+              <span className="text-primary font-semibold block">
+                ₹{item.discountPrice.toFixed(2)}
+              </span>
+              <span className="text-sm text-muted-foreground line-through">
+                ₹{item.price.toFixed(2)}
+              </span>
+            </div>
           </div>
           <p className="text-sm text-muted-foreground line-clamp-2">
             {item.description}
           </p>
           <div className="justify-center flex m-2">
-            <Button
-              // size="md"
-              variant="outline"
-              className="h-7 px-8 py-4 text-md rounded-full"
-              onClick={() => {
-                addItem(item);
-                toast.success("Item added to cart.");
-              }}
-            >
-              <Plus className="h-3 w-3 mr-1" />
-              Add
-            </Button>
+            {!cartItem ? (
+              <Button
+                variant="outline"
+                className="h-7 px-8 py-4 text-md rounded-full"
+                onClick={() => {
+                  addItem(item);
+                  toast.success("Item added to cart.");
+                }}
+              >
+                <Plus className="h-3 w-3 mr-1" />
+                Add
+              </Button>
+            ) : (
+              <div className="flex items-center gap-3">
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    updateQuantity(item.id, cartItem.quantity - 1)
+                  }
+                >
+                  <Minus className="h-3 w-3" />
+                </Button>
+
+                <span className="font-medium w-4 text-center">
+                  {cartItem.quantity}
+                </span>
+
+                <Button
+                  size="icon"
+                  variant="outline"
+                  className="h-8 w-8"
+                  onClick={() =>
+                    updateQuantity(item.id, cartItem.quantity + 1)
+                  }
+                >
+                  <Plus className="h-3 w-3" />
+                </Button>
+              </div>
+            )}
+
           </div>
         </div>
       </motion.div>
@@ -151,25 +165,64 @@ export function MenuCard({ item, index }: MenuCardProps) {
           <h3 className="font-display text-base font-medium text-foreground truncate">
             {item.name}
           </h3>
-          <span className="text-accent font-bold ml-2">
-            ${item.price.toFixed(2)}
-          </span>
+          {/* <span className="text-accent font-bold ml-2">
+            ₹{item.price.toFixed(2)}
+          </span> */}
+
+          <div className="text-right">
+            <span className="text-accent font-bold block">
+              ₹{item.discountPrice.toFixed(2)}
+            </span>
+            <span className="text-xs text-muted-foreground line-through">
+              ₹{item.price.toFixed(2)}
+            </span>
+          </div>
         </div>
         <p className="text-sm text-muted-foreground line-clamp-2 mb-2">
           {item.description}
         </p>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 px-3 text-xs rounded-full"
-          onClick={() => {
-            addItem(item);
-            toast.success("Item added to cart.");
-          }}
-        >
-          <Plus className="h-3 w-3 mr-1" />
-          Add
-        </Button>
+
+        {!cartItem ? (
+          <Button
+            variant="outline"
+            className="h-7 px-8 py-4 text-md rounded-full"
+            onClick={() => {
+              addItem(item);
+              toast.success("Item added to cart.");
+            }}
+          >
+            <Plus className="h-3 w-3 mr-1" />
+            Add
+          </Button>
+        ) : (
+          <div className="flex items-center gap-3">
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-8 w-8"
+              onClick={() =>
+                updateQuantity(item.id, cartItem.quantity - 1)
+              }
+            >
+              <Minus className="h-3 w-3" />
+            </Button>
+
+            <span className="font-medium w-4 text-center">
+              {cartItem.quantity}
+            </span>
+            <Button
+              size="icon"
+              variant="outline"
+              className="h-8 w-8"
+              onClick={() =>
+                updateQuantity(item.id, cartItem.quantity + 1)
+              }
+            >
+              <Plus className="h-3 w-3" />
+            </Button>
+          </div>
+        )}
+
       </div>
     </motion.div>
   );

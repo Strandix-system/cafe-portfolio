@@ -1,22 +1,49 @@
-export type LayoutType = 'elegant' | 'cozy';
+import { LAYOUTS } from "@/utils/constants";
+
+export type LayoutType = typeof LAYOUTS[keyof typeof LAYOUTS];
+
+export interface Admin {
+  _id: string;
+  logo: string;
+  email: string;
+  phoneNumber: string;
+  address: string;
+  gst?: number;
+  cafeName: string;
+}
 
 export interface CafeConfig {
-  layoutType: LayoutType;
-  title: string;
-  description: string;
-  heroImage: string;
-  logo?: string;
-  address: string;
-  phone: string;
-  email: string;
+  layoutTitle: LayoutType;
+  adminId: Admin;
+
+  cafeDescription: string;
+  homeImage: string;
+  aboutImage: string;
   hours: {
     weekdays: string;
     weekends: string;
   };
+  menuTitle: string;
+  menu: MenuItem[];
+
+  aboutTitle: string;
+  aboutDescription: string;
   socialLinks: {
     instagram?: string;
     facebook?: string;
     twitter?: string;
+  };
+}
+export interface CafeBootstrapResponse {
+  success: boolean;
+  message: string;
+  result: CafeConfig & {
+    _id: string;
+    defaultLayout: boolean;
+    // 🔑 present ONLY when defaultLayout === false
+    defaultLayoutId?: string;
+    createdAt: string;
+    updatedAt: string;
   };
 }
 
@@ -25,8 +52,9 @@ export interface MenuItem {
   name: string;
   description: string;
   price: number;
-  image: string;
-  category: MenuCategory;
+  discountPrice?: number;
+  image?: string;
+  category: string;
   isPopular?: boolean;
   isNew?: boolean;
 }

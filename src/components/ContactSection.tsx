@@ -7,7 +7,7 @@ import {
   Instagram,
   Facebook,
   User,
-  Files,
+  Twitter,
 } from "lucide-react";
 import { useLayout } from "@/context/LayoutContext";
 import { Button } from "@/components/ui/button";
@@ -16,10 +16,13 @@ import { Controller, useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { contactSchema } from "../utils/validation";
 import { InputAdornment, TextField } from "@mui/material";
+import { LAYOUTS } from "@/utils/constants";
+import emailjs from "@emailjs/browser";
+import toast from "react-hot-toast";
 
 export function ContactSection() {
   const { layoutType, config } = useLayout();
-  const isElegant = layoutType === "elegant";
+  const isElegant = layoutType === LAYOUTS.ELEGANT;
 
   const {
     control,
@@ -29,11 +32,38 @@ export function ContactSection() {
   } = useForm({
     resolver: yupResolver(contactSchema),
     mode: "all",
+    defaultValues: {
+      firstName: "",
+      email: "",
+      message: "",
+    },
   });
 
-  const onSubmit = (data) => {
-    console.log("Contact Form Data:", data);
-    reset();
+  const onSubmit = async (data) => {
+    try {
+      // safety check
+      if (!config?.adminId?.email) {
+        console.error("Admin email not found");
+        return;
+      }
+
+      await emailjs.send(
+        import.meta.env.VITE_EMAILJS_SERVICE_ID,
+        import.meta.env.VITE_EMAILJS_TEMPLATE_ID,
+        {
+          from_name: data.firstName,
+          from_email: data.email,
+          message: data.message,
+          to_email: config.adminId.email,
+        },
+        import.meta.env.VITE_EMAILJS_PUBLIC_KEY
+      );
+
+      toast.success("Message sent successfully!");
+      reset();
+    } catch (error) {
+      toast.error("Failed to send message");
+    }
   };
 
   return (
@@ -76,19 +106,19 @@ export function ContactSection() {
             viewport={{ once: true }}
             className="space-y-6"
           >
-            <InfoItem icon={MapPin} title="Address" value={config.address} />
-            <InfoItem icon={Phone} title="Phone" value={config.phone} />
-            <InfoItem icon={Mail} title="Email" value={config.email} />
+            <InfoItem icon={MapPin} title="Address" value={config?.adminId?.address} />
+            <InfoItem icon={Phone} title="Phone" value={config?.adminId?.phoneNumber} />
+            <InfoItem icon={Mail} title="Email" value={config?.adminId?.email} />
             <InfoItem
               icon={Clock}
               title="Hours"
-              value={`Mon-Fri: ${config.hours.weekdays} | Sat-Sun: ${config.hours.weekends}`}
+              value={`Mon-Fri: ${config?.hours?.weekdays} | Sat-Sun: ${config?.hours?.weekends}`}
             />
 
             <div className="flex gap-4 pt-4">
-              {config.socialLinks.instagram && (
+              {config?.socialLinks?.instagram && (
                 <a
-                  href={config.socialLinks.instagram}
+                  href={config?.socialLinks?.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-card rounded-full"
@@ -96,14 +126,24 @@ export function ContactSection() {
                   <Instagram className="h-5 w-5" />
                 </a>
               )}
-              {config.socialLinks.facebook && (
+              {config?.socialLinks?.facebook && (
                 <a
-                  href={config.socialLinks.facebook}
+                  href={config?.socialLinks?.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-card rounded-full"
                 >
                   <Facebook className="h-5 w-5" />
+                </a>
+              )}
+              {config?.socialLinks?.twitter && (
+                <a
+                  href={config?.socialLinks?.twitter}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-3 bg-card rounded-full"
+                >
+                  <Twitter className="h-5 w-5" />
                 </a>
               )}
             </div>
@@ -114,16 +154,15 @@ export function ContactSection() {
             initial={{ opacity: 0, x: 20 }}
             whileInView={{ opacity: 1, x: 0 }}
             viewport={{ once: true }}
-            className={`p-6 md:p-8 ${
-              isElegant ? "bg-card" : "bg-card rounded-2xl shadow-card"
-            }`}
+            className={`p-6 md:p-8 ${isElegant ? "bg-card" : "bg-card rounded-2xl shadow-card"
+              }`}
           >
             <h3 className="font-display text-xl font-medium mb-6">
               Send us a message
             </h3>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-              
+            <form onSubmit={handleSubmit( onSubmit, (formErrors) => { console.log("FORM ERRORS:", formErrors);})} className="space-y-6 ">
+
               <Controller
                 name="firstName"
                 control={control}
@@ -181,7 +220,7 @@ export function ContactSection() {
                     multiline
                     rows={4}
                     error={!!errors.message}
-                    // helperText={errors.message?.message}
+                  // helperText={errors.message?.message}
                   />
                 )}
               />
@@ -189,11 +228,10 @@ export function ContactSection() {
               <Button
                 type="submit"
                 disabled={isSubmitting}
-                className={`w-full ${
-                  isElegant
+                className={`w-full ${isElegant
                     ? "bg-primary text-primary-foreground"
                     : "bg-accent text-accent-foreground rounded-xl"
-                }`}
+                  }`}
               >
                 {isSubmitting ? "Sending..." : "Send Message"}
               </Button>
@@ -212,7 +250,7 @@ function InfoItem({ icon: Icon, title, value }) {
       <Icon className="h-6 w-6 text-accent mt-1" />
       <div>
         <h4 className="font-medium mb-1">{title}</h4>
-        <p className="text-muted-foreground">{value}</p>
+        <p className="text-muted-foreground text-sm">{value}</p>
       </div>
     </div>
   );

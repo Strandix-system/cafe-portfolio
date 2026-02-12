@@ -1,6 +1,5 @@
-import { useState } from 'react';
+
 import { CartProvider } from '@/context/CartContext';
-import { LayoutProvider } from '@/context/LayoutContext';
 import { Header } from '@/components/Header';
 import { HeroSection } from '@/components/HeroSection';
 import { MenuSection } from '@/components/MenuSection';
@@ -8,28 +7,47 @@ import { AboutSection } from '@/components/AboutSection';
 import { ContactSection } from '@/components/ContactSection';
 import { Footer } from '@/components/Footer';
 import { CartDrawer } from '@/components/CartDrawer';
-import { LayoutToggle } from '@/components/LayoutToggle';
+import { useEffect, useState } from "react";
+import LoginPopup from "@/components/LoginPopup";
+import { useAuth } from "@/context/AuthContext";
+import { useLocation } from "react-router-dom";
 
 const Index = () => {
   const [isCartOpen, setIsCartOpen] = useState(false);
+  const {isAuthenticated} = useAuth();
+
+  const [showLogin, setShowLogin] = useState(false);
+  const location = useLocation();
+
+  useEffect(() => {
+    if (location.state?.scrollTo) {
+      setTimeout(() => {
+        document
+          .getElementById(location.state.scrollTo)
+          ?.scrollIntoView({ behavior: "smooth" });
+      }, 200);
+    }
+  }, [location]);
+
+  useEffect(()=>{
+    setShowLogin(!isAuthenticated);
+  }, [isAuthenticated])
 
   return (
-    <LayoutProvider>
-      <CartProvider>
-        <div className="min-h-screen bg-background">
-          <Header onCartClick={() => setIsCartOpen(true)} />
-          <main className='overflow-hidden'>
-            <HeroSection />
-            <MenuSection />
-            <AboutSection />
-            <ContactSection />
-          </main>
-          <Footer />
-          <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
-          <LayoutToggle />
-        </div>
-      </CartProvider>
-    </LayoutProvider>
+    <CartProvider>
+      <div className="min-h-screen bg-background">
+        <LoginPopup open={showLogin} onClose={() => setShowLogin(false)} />
+        <Header onCartClick={() => setIsCartOpen(true)} />
+        <main className='overflow-hidden'>
+          <HeroSection />
+          <MenuSection />
+          <AboutSection />
+          <ContactSection />
+        </main>
+        <Footer />
+        <CartDrawer isOpen={isCartOpen} onClose={() => setIsCartOpen(false)} />
+      </div>
+    </CartProvider>
   );
 };
 

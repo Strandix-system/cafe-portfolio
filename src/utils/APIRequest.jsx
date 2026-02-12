@@ -1,12 +1,14 @@
 import { api_enums } from "./api";
 
 export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 const handleResponse = async (response) => {
+  const data = await response.json();   // ✅ read once
   if (!response.ok) {
-    const error = await response.json();
-    throw error.message || "Something went wrong";
+    throw new Error(data.message || "Something went wrong");
   }
-  return response.json();
+
+  return data;  
 };
 
 const getBody = (data) =>
@@ -15,7 +17,7 @@ const getBody = (data) =>
 export const getAccessToken = () => {
   return localStorage.getItem(api_enums.JWT_ACCESS_TOKEN)
     ? localStorage.getItem(api_enums.JWT_ACCESS_TOKEN)
-    : window.localStorage.getItem(api_enums.JWT_ONBOARDING_ACCESS_TOKEN);
+    : window.localStorage.getItem(api_enums.JWT_ACCESS_TOKEN);
 };
 
 const getHeaders = (body = {}) => {
