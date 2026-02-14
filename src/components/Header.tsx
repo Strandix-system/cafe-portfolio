@@ -16,7 +16,7 @@ export function Header({ onCartClick }: HeaderProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const { itemCount } = useCart();
   const { layoutType, config } = useLayout();;
-  const { layoutId, qrId } = useParams();
+  const { qrId } = useParams();
   const navigate = useNavigate();
   const location = useLocation();
   const navItems = [
@@ -25,7 +25,7 @@ export function Header({ onCartClick }: HeaderProps) {
     { label: "About", section: "about" },
     { label: "Contact", section: "contact" },
   ];
-  const basePath = `/${layoutId}${qrId ? `/${qrId}` : ""}`
+  const basePath = `/${qrId}`;
 
   const isElegant = layoutType === LAYOUTS.ELEGANT;
 

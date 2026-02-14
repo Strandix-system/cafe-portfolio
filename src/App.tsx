@@ -36,7 +36,7 @@ export default function App() {
           <AuthProvider>
             <BrowserRouter>
               <Routes>
-                <Route path="/:layoutId/:qrId?" element={<LayoutProvider> <Index /> </LayoutProvider>} />
+                <Route path="/:qrId" element={<LayoutProvider> <Index /> </LayoutProvider>} />
                 <Route
                   path="/cafe/:layoutId/*"
                   element={
@@ -46,7 +46,7 @@ export default function App() {
                   }
                 />
                 <Route
-                  path="/:layoutId/:qrId?/my-orders"
+                  path="/:qrId/my-orders"
                   element={
                     <LayoutProvider>
                       <MyOrders />

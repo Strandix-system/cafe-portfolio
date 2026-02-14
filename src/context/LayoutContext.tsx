@@ -51,43 +51,47 @@ const getFinalLayout = (
   return resolveLayoutFromId(result.defaultLayoutId);
 };
 
-export const getCafeBootstrap = async (
-  layoutId: string
-): Promise<CafeBootstrapResponse> => {
-  const res = await APIRequest.get(
-    `${API_ROUTES.getLayoutById}/${layoutId}`
-  );
-  return res;
-}
-
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
-  const { layoutId, qrId } = useParams<{ layoutId: string; qrId?: string; }>();
+  const { qrId } = useParams<{ qrId?: string; }>();
 
   const isPreview = !qrId;
-  const { data, isLoading, error }  = useFetch(
-  ['get-layout', layoutId],
-  `${API_ROUTES.getLayoutById}/${layoutId}`
-);
 
-  const layoutType = getFinalLayout(data, layoutId);
+  const { data: tableData, isLoading, error } = useFetch(
+    qrId ? ["get-table-by-qr", qrId] : null,
+    qrId ? `${API_ROUTES.getTableByQr}/${qrId}` : null, {},
+    {
+      enabled: true
+    }
+  );
+
+  const { data: layoutData, isLoading: isLayoutLoading, error: layoutError } = useFetch(`get-active-layout`, `${API_ROUTES.getActiveLayout}/${tableData?.result?.adminId}`, {},
+    {
+      enabled: !!tableData
+    }
+  );
+
+  const tableNo = tableData?.result?.tableNumber;
 
   const [tableNumber, setTableNumber] = useState<string | null>(null);
 
-  const { data: tableData } = useFetch(qrId ? "get-table-by-qr" : null, qrId ? `${API_ROUTES.getTableByQr}/${qrId}` : null);
-
   useEffect(() => {
-    if (tableData?.result?.tableNumber !== undefined) {
-      setTableNumber(String(tableData.result.tableNumber));
+    if (tableNo !== undefined) {
+      setTableNumber(String(tableNo));
+    } else if (layoutData?.adminId?.role === 'superAdmin') {
+      setTableNumber("1");
     }
-  }, [tableData]);
+  }, [tableNo, layoutData])
+
+  const layoutId = layoutData?.result?.layoutId
+  const layoutType = getFinalLayout(layoutData, layoutId);
 
   useEffect(() => {
-    if (!data?.result) return;
+    if (!layoutData?.result) return;
 
-    const cafeName = data.result.adminId?.cafeName || "Cafe";
-    const logo = data.result.adminId.logo || "/favicon.ico";
+    const cafeName = layoutData.result.adminId?.cafeName || "Cafe";
+    const logo = layoutData.result.adminId.logo || "/favicon.ico";
     const description =
-      data.result.cafeDescription || `Welcome to ${cafeName}`;
+      layoutData.result.cafeDescription || `Welcome to ${cafeName}`;
 
     document.title = cafeName;
     updateFavicon(logo);
@@ -98,13 +102,13 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     updateMetaProperty("twitter:title", cafeName);
     updateMetaProperty("twitter:description", description);
     updateMetaProperty("twitter:image", logo);
-  }, [data]);
+  }, [layoutData]);
 
 
   const menuItems: MenuItem[] =
-    data?.result?.menus?.map((item: any) => ({
+    layoutData?.result?.menus?.map((item: any) => ({
       ...item,
-      id: item._id, 
+      id: item._id,
     })) || [];
 
   const categories: string[] = Array.from(
@@ -112,14 +116,14 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   );
 
   const gstPercentage =
-    data?.result?.adminId?.gst ?? 5;
+    layoutData?.result?.adminId?.gst ?? 5;
 
   return (
     <LayoutContext.Provider
       value={{
         layoutType,
-        config: data?.result,
-        cafeId: data?.result?._id,
+        config: layoutData?.result,
+        cafeId: layoutData?.result?._id,
         menuItems,
         categories,
         gstPercentage,
@@ -128,8 +132,8 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
         isFromQR: !!qrId,
         isPreview,
         qrId,
-        isLoading,
-        error,
+        isLoading: isLoading || isLayoutLoading,
+        error: layoutError || error,
       }}
     >
       {children}
@@ -142,6 +146,7 @@ export function useLayout() {
   if (!context) throw new Error("useLayout must be used within LayoutProvider");
   return context;
 }
+
 function updateFavicon(href: string) {
   document
     .querySelectorAll('link[rel="icon"], link[rel="shortcut icon"]')

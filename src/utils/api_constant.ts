@@ -4,5 +4,6 @@ const API_ROUTES = {
     getTableByQr: 'qr/scan',
     placeOrder: "order/public/create",
     getCustomerOrder: "order/my-orders",
+    getActiveLayout: "layout/active"
 }
 export default API_ROUTES;

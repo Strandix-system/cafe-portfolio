@@ -10,6 +10,16 @@ export interface Admin {
   address: string;
   gst?: number;
   cafeName: string;
+  hours: {
+    weekdays: string;
+    weekends: string;
+  };
+  socialLinks: {
+    instagram?: string;
+    facebook?: string;
+    twitter?: string;
+  };
+  role: string
 }
 
 export interface CafeConfig {
@@ -19,20 +29,12 @@ export interface CafeConfig {
   cafeDescription: string;
   homeImage: string;
   aboutImage: string;
-  hours: {
-    weekdays: string;
-    weekends: string;
-  };
+
   menuTitle: string;
   menu: MenuItem[];
 
   aboutTitle: string;
   aboutDescription: string;
-  socialLinks: {
-    instagram?: string;
-    facebook?: string;
-    twitter?: string;
-  };
 }
 export interface CafeBootstrapResponse {
   success: boolean;
