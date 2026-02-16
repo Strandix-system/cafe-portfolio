@@ -27,6 +27,8 @@ interface LayoutContextType {
 
   isLoading: boolean;
   error: unknown;
+
+   isLayoutFromQR: boolean;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -37,18 +39,19 @@ const resolveLayoutFromId = (id?: string): LayoutType => {
   return LAYOUTS.ELEGANT;
 };
 
-const getFinalLayout = (
-  data: CafeBootstrapResponse | undefined,
-  urlLayoutId?: string
-): LayoutType => {
-  if (!data) return LAYOUTS.ELEGANT;
-
-  const { result } = data;
-
-  if (urlLayoutId) {
-    return resolveLayoutFromId(urlLayoutId);
-  }
-  return resolveLayoutFromId(result.defaultLayoutId);
+// const getFinalLayout = (
+//   data: CafeBootstrapResponse | undefined,
+//   urlLayoutId?: string
+// ): LayoutType => {
+//   if (!data) return LAYOUTS.ELEGANT;
+//   const { result } = data;
+//   if (urlLayoutId) {
+//     return resolveLayoutFromId(urlLayoutId);
+//   }
+//   return resolveLayoutFromId(result.defaultLayoutId);
+// };
+const getFinalLayout = (layoutId?: string): LayoutType => {
+  return resolveLayoutFromId(layoutId);
 };
 
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
@@ -61,29 +64,46 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
     qrId ? `${API_ROUTES.getTableByQr}/${qrId}` : null, {},
     {
       enabled: true
-    }
+    }  
   );
 
-  const { data: layoutData, isLoading: isLayoutLoading, error: layoutError } = useFetch(`get-active-layout`, `${API_ROUTES.getActiveLayout}/${tableData?.result?.adminId}`, {},
-    {
-      enabled: !!tableData
-    }
+  const qrLayoutId = tableData?.result?.layoutId;
+   const adminId = tableData?.result?.adminId;
+
+   const isLayoutFromQR = !!qrLayoutId;
+
+    const layoutApiUrl = qrLayoutId
+    ? `${API_ROUTES.getLayoutById}/${qrLayoutId}` // ✅ QR layout
+    : adminId
+    ? `${API_ROUTES.getActiveLayout}/${adminId}` // ✅ fallback
+    : null;
+
+     const {
+    data: layoutData,
+    isLoading: isLayoutLoading,
+    error: layoutError,
+  } = useFetch(
+    layoutApiUrl ? ["get-layout", qrLayoutId || adminId] : null,
+    layoutApiUrl,
+    {},
+    { enabled: !!layoutApiUrl }
   );
 
   const tableNo = tableData?.result?.tableNumber;
-
   const [tableNumber, setTableNumber] = useState<string | null>(null);
 
   useEffect(() => {
     if (tableNo !== undefined) {
       setTableNumber(String(tableNo));
-    } else if (layoutData?.adminId?.role === 'superAdmin') {
+    } else if (layoutData?.result?.adminId?.role === 'superAdmin') {
       setTableNumber("1");
     }
   }, [tableNo, layoutData])
 
-  const layoutId = layoutData?.result?.layoutId
-  const layoutType = getFinalLayout(layoutData, layoutId);
+  // const layoutId = layoutData?.result?.layoutId
+  const layoutId = isLayoutFromQR? qrLayoutId: layoutData?.result?.defaultLayoutId;
+  // const layoutType = getFinalLayout(layoutData, layoutId);
+  const layoutType = getFinalLayout(layoutId);
 
   useEffect(() => {
     if (!layoutData?.result) return;
@@ -127,6 +147,7 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
         menuItems,
         categories,
         gstPercentage,
+         isLayoutFromQR,
         tableNumber,
         setTableNumber,
         isFromQR: !!qrId,
