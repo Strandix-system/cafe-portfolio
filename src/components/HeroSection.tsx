@@ -110,7 +110,7 @@ function ElegantHeroContent({ config }: { config: any }) {
       >
         <div className="flex items-center gap-3 text-primary-foreground/80">
           <Clock className="h-5 w-5 text-sage-light" />
-          <span className="text-sm">{config?.hours?.weekdays}</span>
+          <span className="text-sm">{config?.adminId?.hours?.weekdays}</span>
         </div>
         <div className="flex items-center gap-3 text-primary-foreground/80">
           <MapPin className="h-5 w-5 text-sage-light" />
@@ -187,7 +187,7 @@ function CozyHeroContent({ config }: { config: any }) {
         <div className="flex flex-col items-center text-primary-foreground">
           <Clock className="h-6 w-6 mb-2 text-sage" />
           <span className="text-sm font-medium">Open Daily</span>
-          <span className="text-xs opacity-80">{config?.hours?.weekdays}</span>
+          <span className="text-xs opacity-80">{config?.adminId?.hours?.weekdays}</span>
         </div>
         <div className="flex flex-col items-center text-primary-foreground">
           <MapPin className="h-6 w-6 mb-2 text-sage" />

@@ -21,7 +21,7 @@ import { useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 
 export default function LoginPopup({ open, onClose }) {
-  const { config, tableNumber, setTableNumber, isFromQR, isPreview, cafeId } = useLayout();
+  const { config, tableNumber, setTableNumber, isFromQR, isPreview, cafeId ,isLayoutFromQR} = useLayout();
   const {setUser} = useAuth();
   const {
     control,
@@ -65,7 +65,8 @@ export default function LoginPopup({ open, onClose }) {
     mutate({ ...data, adminId: config.adminId._id });
   };
 
-  if (isPreview) return null;
+  // if (isPreview) return null;
+  if (isPreview || isLayoutFromQR) return null;
 
   return (
     <Dialog open={open} onClose={onClose}>

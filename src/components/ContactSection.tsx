@@ -112,13 +112,13 @@ export function ContactSection() {
             <InfoItem
               icon={Clock}
               title="Hours"
-              value={`Mon-Fri: ${config?.hours?.weekdays} | Sat-Sun: ${config?.hours?.weekends}`}
+              value={`Mon-Fri: ${config?.adminId?.hours?.weekdays} | Sat-Sun: ${config?.adminId?.hours?.weekends}`}
             />
 
             <div className="flex gap-4 pt-4">
-              {config?.socialLinks?.instagram && (
+              {config?.adminId?.socialLinks?.instagram && (
                 <a
-                  href={config?.socialLinks?.instagram}
+                  href={config?.adminId?.socialLinks?.instagram}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-card rounded-full"
@@ -126,9 +126,9 @@ export function ContactSection() {
                   <Instagram className="h-5 w-5" />
                 </a>
               )}
-              {config?.socialLinks?.facebook && (
+              {config?.adminId?.socialLinks?.facebook && (
                 <a
-                  href={config?.socialLinks?.facebook}
+                  href={config?.adminId?.socialLinks?.facebook}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-card rounded-full"
@@ -136,9 +136,9 @@ export function ContactSection() {
                   <Facebook className="h-5 w-5" />
                 </a>
               )}
-              {config?.socialLinks?.twitter && (
+              {config?.adminId?.socialLinks?.twitter && (
                 <a
-                  href={config?.socialLinks?.twitter}
+                  href={config?.adminId?.socialLinks?.twitter}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="p-3 bg-card rounded-full"

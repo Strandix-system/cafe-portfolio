@@ -27,6 +27,8 @@ interface LayoutContextType {
 
   isLoading: boolean;
   error: unknown;
+
+   isLayoutFromQR: boolean;
 }
 
 const LayoutContext = createContext<LayoutContextType | undefined>(undefined);
@@ -37,49 +39,91 @@ const resolveLayoutFromId = (id?: string): LayoutType => {
   return LAYOUTS.ELEGANT;
 };
 
-const getFinalLayout = (
-  data: CafeBootstrapResponse | undefined,
-  urlLayoutId?: string
-): LayoutType => {
-  if (!data) return LAYOUTS.ELEGANT;
-
-  const { result } = data;
-
-  if (urlLayoutId) {
-    return resolveLayoutFromId(urlLayoutId);
-  }
-  return resolveLayoutFromId(result.defaultLayoutId);
+// const getFinalLayout = (
+//   data: CafeBootstrapResponse | undefined,
+//   urlLayoutId?: string
+// ): LayoutType => {
+//   if (!data) return LAYOUTS.ELEGANT;
+//   const { result } = data;
+//   if (urlLayoutId) {
+//     return resolveLayoutFromId(urlLayoutId);
+//   }
+//   return resolveLayoutFromId(result.defaultLayoutId);
+// };
+const getFinalLayout = (layoutId?: string): LayoutType => {
+  return resolveLayoutFromId(layoutId);
 };
 
-export const getCafeBootstrap = async (
-  layoutId: string
-): Promise<CafeBootstrapResponse> => {
-  const res = await APIRequest.get(
-    `${API_ROUTES.getLayoutById}/${layoutId}`
-  );
-  return res;
-}
-
 export function LayoutProvider({ children }: { children: React.ReactNode }) {
-  const { layoutId, qrId } = useParams<{ layoutId: string; qrId?: string; }>();
+  const { qrId } = useParams<{ qrId?: string; }>();
 
   const isPreview = !qrId;
-  const { data, isLoading, error }  = useFetch(
-  ['get-layout', layoutId],
-  `${API_ROUTES.getLayoutById}/${layoutId}`
-);
 
-  const layoutType = getFinalLayout(data, layoutId);
+  const { data: tableData, isLoading, error } = useFetch(
+    qrId ? ["get-table-by-qr", qrId] : null,
+    qrId ? `${API_ROUTES.getTableByQr}/${qrId}` : null, {},
+    {
+      enabled: true
+    }  
+  );
 
+  const qrLayoutId = tableData?.result?.layoutId;
+   const adminId = tableData?.result?.adminId;
+
+   const isLayoutFromQR = !!qrLayoutId;
+
+    const layoutApiUrl = qrLayoutId
+    ? `${API_ROUTES.getLayoutById}/${qrLayoutId}` // ✅ QR layout
+    : adminId
+    ? `${API_ROUTES.getActiveLayout}/${adminId}` // ✅ fallback
+    : null;
+
+     const {
+    data: layoutData,
+    isLoading: isLayoutLoading,
+    error: layoutError,
+  } = useFetch(
+    layoutApiUrl ? ["get-layout", qrLayoutId || adminId] : null,
+    layoutApiUrl,
+    {},
+    { enabled: !!layoutApiUrl }
+  );
+
+  const tableNo = tableData?.result?.tableNumber;
   const [tableNumber, setTableNumber] = useState<string | null>(null);
 
-  const { data: tableData } = useFetch(qrId ? "get-table-by-qr" : null, qrId ? `${API_ROUTES.getTableByQr}/${qrId}` : null);
+  useEffect(() => {
+    if (tableNo !== undefined) {
+      setTableNumber(String(tableNo));
+    } else if (layoutData?.result?.adminId?.role === 'superAdmin') {
+      setTableNumber("1");
+    }
+  }, [tableNo, layoutData])
+
+  // const layoutId = layoutData?.result?.layoutId
+  const layoutId = isLayoutFromQR? qrLayoutId: layoutData?.result?.defaultLayoutId;
+  // const layoutType = getFinalLayout(layoutData, layoutId);
+  const layoutType = getFinalLayout(layoutId);
 
   useEffect(() => {
-    if (tableData?.result?.tableNumber !== undefined) {
-      setTableNumber(String(tableData.result.tableNumber));
-    }
-  }, [tableData]);
+    if (!layoutData?.result) return;
+
+    const cafeName = layoutData.result.adminId?.cafeName || "Cafe";
+    const logo = layoutData.result.adminId.logo || "/favicon.ico";
+    const description =
+      layoutData.result.cafeDescription || `Welcome to ${cafeName}`;
+
+    document.title = cafeName;
+    updateFavicon(logo);
+    updateMeta("description", description);
+    updateMetaProperty("og:title", cafeName);
+    updateMetaProperty("og:description", description);
+    updateMetaProperty("og:image", logo);
+    updateMetaProperty("twitter:title", cafeName);
+    updateMetaProperty("twitter:description", description);
+    updateMetaProperty("twitter:image", logo);
+  }, [layoutData]);
+
 
   useEffect(() => {
     if (!data?.result) return;
@@ -102,9 +146,9 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
 
 
   const menuItems: MenuItem[] =
-    data?.result?.menus?.map((item: any) => ({
+    layoutData?.result?.menus?.map((item: any) => ({
       ...item,
-      id: item._id, 
+      id: item._id,
     })) || [];
 
   const categories: string[] = Array.from(
@@ -112,24 +156,25 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   );
 
   const gstPercentage =
-    data?.result?.adminId?.gst ?? 5;
+    layoutData?.result?.adminId?.gst ?? 5;
 
   return (
     <LayoutContext.Provider
       value={{
         layoutType,
-        config: data?.result,
-        cafeId: data?.result?._id,
+        config: layoutData?.result,
+        cafeId: layoutData?.result?._id,
         menuItems,
         categories,
         gstPercentage,
+         isLayoutFromQR,
         tableNumber,
         setTableNumber,
         isFromQR: !!qrId,
         isPreview,
         qrId,
-        isLoading,
-        error,
+        isLoading: isLoading || isLayoutLoading,
+        error: layoutError || error,
       }}
     >
       {children}

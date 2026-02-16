@@ -43,7 +43,7 @@ export function CartDrawer({ isOpen, onClose }: CartDrawerProps) {
         clearCart();
         setNotes("");
         onClose();
-        navigate(`/${layoutId}${qrId ? `/${qrId}` : ""}/my-orders`);
+        navigate(`/${qrId}/my-orders`);
       },
       onError: (error: any) => {
         toast.error(error.message || "Failed to place order");

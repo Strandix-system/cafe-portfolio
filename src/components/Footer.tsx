@@ -20,14 +20,14 @@ export function Footer() {
               config?.adminId?.logo ? (
                 <img src={config.adminId.logo} alt="logo" className="h-14 rounded-full" />
               ) :
-                <><Coffee className="h-5 w-5" /></>
+                <Coffee className="h-5 w-5" />
             }
-            <span className="font-display text-sm font-medium">{config?.adminId?.cafeName ? config?.adminId?.cafeName : "Brew & Bean"}</span>
+            <span className="font-display text-md font-medium">{config?.adminId?.cafeName ? config?.adminId?.cafeName : "Brew & Bean"}</span>
           </div>
 
           <div className="flex items-center justify-center flex-col gap-1 text-sm text-primary-foreground/80">
             <p className="text-sm text-primary-foreground/80 flex items-center gap-1">
-              © 2024 {config?.adminId?.cafeName}.
+              &copy; {new Date().getFullYear()} | {config?.adminId?.cafeName || "Brew & Bean"}.
             </p>
             <p>Brewing moments with care <Heart className="h-4 w-4 text-terracotta inline-block" /></p>
           </div>
