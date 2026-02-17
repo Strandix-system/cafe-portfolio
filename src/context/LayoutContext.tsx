@@ -125,24 +125,24 @@ export function LayoutProvider({ children }: { children: React.ReactNode }) {
   }, [layoutData]);
 
 
-  useEffect(() => {
-    if (!data?.result) return;
+  // useEffect(() => {
+  //   if (!data?.result) return;
 
-    const cafeName = data.result.adminId?.cafeName || "Cafe";
-    const logo = data.result.adminId.logo || "/favicon.ico";
-    const description =
-      data.result.cafeDescription || `Welcome to ${cafeName}`;
+  //   const cafeName = data.result.adminId?.cafeName || "Cafe";
+  //   const logo = data.result.adminId.logo || "/favicon.ico";
+  //   const description =
+  //     data.result.cafeDescription || `Welcome to ${cafeName}`;
 
-    document.title = cafeName;
-    updateFavicon(logo);
-    updateMeta("description", description);
-    updateMetaProperty("og:title", cafeName);
-    updateMetaProperty("og:description", description);
-    updateMetaProperty("og:image", logo);
-    updateMetaProperty("twitter:title", cafeName);
-    updateMetaProperty("twitter:description", description);
-    updateMetaProperty("twitter:image", logo);
-  }, [data]);
+  //   document.title = cafeName;
+  //   updateFavicon(logo);
+  //   updateMeta("description", description);
+  //   updateMetaProperty("og:title", cafeName);
+  //   updateMetaProperty("og:description", description);
+  //   updateMetaProperty("og:image", logo);
+  //   updateMetaProperty("twitter:title", cafeName);
+  //   updateMetaProperty("twitter:description", description);
+  //   updateMetaProperty("twitter:image", logo);
+  // }, [data]);
 
 
   const menuItems: MenuItem[] =
